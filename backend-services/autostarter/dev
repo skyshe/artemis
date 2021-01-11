@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -d "/utils" ]; then
+  pip install /utils
+fi
+
+if [ -d "/code" ]; then
+  rm -rf /opt/autostarter/
+  ln -s /code /opt/autostarter
+fi

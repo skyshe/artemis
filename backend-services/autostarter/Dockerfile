@@ -1,20 +1,26 @@
-FROM mavromat/artemis-base-images:backend-1.0.0
+FROM python:3.9-alpine
+
 LABEL maintainer="Dimitrios Mavrommatis <jim.mavrommatis@gmail.com>"
+ARG module=autostarter
 
-WORKDIR /root
+# directories
+RUN mkdir -p /etc/artemis/ && \
+    mkdir -p /var/log/artemis && \
+    mkdir -p /etc/service/$module && \
+    mkdir -p /opt/$module && \
+    mkdir -p /etc/run_once
 
-# backwards compatibility
-RUN ln -s /usr/local/lib/pyenv/versions/3.6.8/bin/python /usr/local/bin
+WORKDIR /opt/$module
+
+# deps
+RUN apk add --no-cache postgresql-client postgresql-dev redis \
+  curl git libffi-dev cmake libssh build-base runit bash python3-dev
 
 COPY requirements.txt ./requirements.txt
 RUN pip --no-cache-dir install -r requirements.txt --ignore-installed
 
-RUN mkdir -p /etc/artemis/ && \
-    mkdir -p /var/log/artemis/
+COPY . .
+COPY run /etc/service/$module/run
+COPY dev /etc/run_once/dev
 
-COPY entrypoint Makefile wait-for ./
-COPY core ./core
-
-RUN make clean && make -j
-
-ENTRYPOINT ["./entrypoint"]
+CMD ["./boot.sh"]

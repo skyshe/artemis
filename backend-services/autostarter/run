@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd /opt/autostarter/
+
+# don't compile when developing
+if [ ! -d "/code" ]; then
+  make -j
+fi
+
+cd core
+python -c "import autostarter; autostarter.main()"
